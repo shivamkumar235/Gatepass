@@ -1,12 +1,32 @@
 const express = require("express");
-// const jwt = require("jsonwebtoken");
-// const authMiddleware = require("../middlewares/auth.middleware");
-const gatePass = require("../controllers/gatePass.controller");
 const router = express.Router();
+const gatePass = require("../controllers/gatePass.controller");
+const { verifyToken, allowRoles } = require("../middleware/auth.middleware");
 
-router.get("/", gatePass.gatPass); // GET  /api/passes
-router.post("/", gatePass.createGatePass); // POST /api/passes
-router.get("/:passId", gatePass.findGatePass); // GET  /api/passes/GP-1001
-router.put("/:passId", gatePass.updateGatePass);
+// Har route par pehle verifyToken (login?), phir allowRoles (role sahi?)
+router.get(
+  "/",
+  verifyToken,
+  allowRoles(["manager", "guard"]),
+  gatePass.gatPass,
+);
+router.post(
+  "/",
+  verifyToken,
+  allowRoles(["manager", "dispatch"]),
+  gatePass.createGatePass,
+);
+router.get(
+  "/:passId",
+  verifyToken,
+  allowRoles(["manager", "guard"]),
+  gatePass.findGatePass,
+);
+router.put(
+  "/:passId",
+  verifyToken,
+  allowRoles(["manager", "guard"]),
+  gatePass.updateGatePass,
+);
 
 module.exports = router;

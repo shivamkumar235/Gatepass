@@ -45,23 +45,44 @@ async function findGatePass(req, res) {
 
 async function updateGatePass(req, res) {
   try {
-    const { status } = req.body;
-    if (!["Dispatched", "On Hold"].includes(status)) {
-      return res
-        .status(400)
-        .json({ message: "Status must be Dispatched or On Hold" });
+    // 1. Frontend ne jo status bheja woh nikalo
+    const status = req.body.status;
+
+    // 2. Sirf yehi do status allow hain
+    if (status !== "Dispatched" && status !== "On Hold") {
+      res.status(400);
+      res.json({ message: "Status must be Dispatched or On Hold" });
+      return;
     }
-    const update = { status };
-    if (status === "Dispatched") update.exitTime = new Date(); // log exit time
+
+    // 3. Update ka object banao
+    const update = {};
+    update.status = status;
+
+    // 4. Dispatched hai toh abhi ka time exitTime mein daalo
+    if (status === "Dispatched") {
+      update.exitTime = new Date();
+    }
+
+    // 5. Database mein pass dhoondho aur update karo
     const pass = await GatePass.findOneAndUpdate(
-      { passId: req.params.passId },
-      update,
-      { new: true },
+      { passId: req.params.passId }, // kise dhoondho
+      update, // kya badlo
+      { new: true }, // badla hua data wapas do
     );
-    if (!pass) return res.status(404).json({ message: "Pass not found" });
+
+    // 6. Pass mila hi nahi
+    if (!pass) {
+      res.status(404);
+      res.json({ message: "Pass not found" });
+      return;
+    }
+
+    // 7. Sab theek, updated pass wapas bhejo
     res.json(pass);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500);
+    res.json({ message: err.message });
   }
 }
 

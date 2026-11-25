@@ -1,12 +1,14 @@
-const express = require("express"); // yeh line missing thi
+const express = require("express");
 const cors = require("cors");
+const authRoutes = require("./routes/auth.route");
 const gatePassRoutes = require("./routes/gatePass.route");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json()); // read JSON from request body
+app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(express.json());
 
-app.use("/api/passes", gatePassRoutes);
+app.use("/api/auth", authRoutes); // login
+app.use("/api/passes", gatePassRoutes); // gate passes (login zaroori)
 
 module.exports = app;
